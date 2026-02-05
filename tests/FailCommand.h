@@ -16,7 +16,16 @@ public:
         return "fail";
     }
 
-    void execute() override { throw TestException("test exception"); }
+    void execute() override
+    {
+        m_executeCount++;
+        throw TestException("test exception");
+    }
+
+    unsigned getExecuteCount() const { return m_executeCount; }
+
+private:
+    unsigned m_executeCount{0};
 };
 
 }  // namespace otus

@@ -3,6 +3,7 @@ set(test_name "tests_hw3")
 add_executable(${test_name}
     ${CMAKE_SOURCE_DIR}/tests/LogCommandTest.cpp
     ${CMAKE_SOURCE_DIR}/tests/RepeatCommandTest.cpp
+    ${CMAKE_SOURCE_DIR}/tests/RepeatAndLogTest.cpp
 )
 
 target_link_libraries(${test_name}

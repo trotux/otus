@@ -32,6 +32,8 @@ public:
         m_cmd->execute();
     }
 
+    std::shared_ptr<ICommand> getCmd() const { return m_cmd; }
+
 private:
     std::shared_ptr<ICommand> m_cmd;
 };
