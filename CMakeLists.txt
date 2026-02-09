@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 project(otus CXX)
-set(TARGET otus_hw3)
+set(TARGET otus_hw)
 
 include(GNUInstallDirs)
 
@@ -21,7 +21,7 @@ file(GLOB
 )
 
 add_library(${TARGET} STATIC ${SRC_FILES})
-add_library(otus::hw3 ALIAS ${TARGET})
+add_library(otus::hw ALIAS ${TARGET})
 
 target_include_directories(${TARGET} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>"
         "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>")
