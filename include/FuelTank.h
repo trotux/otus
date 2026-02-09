@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdexcept>
+#include "NotEnoughFuelException.h"
 
 namespace otus
 {
@@ -13,6 +13,11 @@ public:
         : m_level{level}
     {}
 
+    bool empty() const
+    {
+        return m_level == 0;
+    }
+
     int getLevel() const
     {
         return m_level;
@@ -22,7 +27,7 @@ public:
     {
         if (m_level < delta)
         {
-            throw std::runtime_error("not enough fuel");
+            throw NotEnoughtFuelException("not enough fuel");
         }
 
         m_level -= delta;

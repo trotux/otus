@@ -2,6 +2,7 @@ set(test_name "tests_hw4")
 
 add_executable(${test_name}
     ${CMAKE_SOURCE_DIR}/tests/CheckFuelCommandTest.cpp
+    ${CMAKE_SOURCE_DIR}/tests/BurnFuelCommandTest.cpp
 )
 
 target_link_libraries(${test_name}
