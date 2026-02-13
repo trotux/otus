@@ -4,6 +4,7 @@ add_executable(${test_name}
     ${CMAKE_SOURCE_DIR}/tests/CheckFuelCommandTest.cpp
     ${CMAKE_SOURCE_DIR}/tests/BurnFuelCommandTest.cpp
     ${CMAKE_SOURCE_DIR}/tests/MacroCommandTest.cpp
+    ${CMAKE_SOURCE_DIR}/tests/ChangeVelocityCommandTest.cpp
 )
 
 target_link_libraries(${test_name}
