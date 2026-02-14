@@ -3,6 +3,7 @@
 #include "ICommand.h"
 #include "IRotatableObject.h"
 #include "NoLocationException.h"
+#include "NoDirectionException.h"
 #include "NoVelocityException.h"
 #include "NoMagnitudeException.h"
 #include "NonMovableException.h"
@@ -29,7 +30,7 @@ public:
 
         if (direction == nullptr)
         {
-            throw NoLocationException("object does not have direction");
+            throw NoDirectionException("object does not have direction");
         }
 
         if (magnitude == nullptr)
