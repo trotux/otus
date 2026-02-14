@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Error.h"
 #include "IRotatableObject.h"
 #include "Direction.h"
 #include "AngularVelocity.h"

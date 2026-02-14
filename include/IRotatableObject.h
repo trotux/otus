@@ -1,5 +1,6 @@
 #pragma once
 
+#include "AngularVelocity.h"
 #include "Direction.h"
 #include "Magnitude.h"
 #include "Velocity.h"
@@ -18,6 +19,7 @@ public:
     virtual void setVelocity(std::shared_ptr<Velocity>) = 0;
     virtual std::shared_ptr<Velocity> getVelocity() = 0;
     virtual std::shared_ptr<Magnitude> getMagnitude() = 0;
+    virtual std::shared_ptr<AngularVelocity> getAngularVelocity() = 0;
 };
 
 }  // namespace otus

@@ -2,10 +2,12 @@
 
 #include "IRotatableObject.h"
 
+#include "AngularVelocity.h"
 #include "Direction.h"
 #include "Magnitude.h"
-#include "UObject.h"
 #include "Velocity.h"
+
+#include "UObject.h"
 
 #include <memory>
 #include <stdexcept>
@@ -25,6 +27,17 @@ public:
             throw std::runtime_error("IRotatableObject must be not nullptr");
         }
     }
+
+    std::shared_ptr<AngularVelocity> getAngularVelocity() override
+    {
+        if (m_object == nullptr)
+        {
+            return nullptr;
+        }
+
+        return m_object->getProperty<AngularVelocity>("angular_velocity");
+    }
+
 
     void setVelocity(std::shared_ptr<Velocity> velocity) override
     {
