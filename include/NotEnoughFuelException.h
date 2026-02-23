@@ -6,19 +6,22 @@
 namespace otus
 {
 
-class BaseException : public std::exception
+class NotEnoughtFuelException : public std::exception
 {
 public:
-    virtual ~BaseException() = default;
+    virtual ~NotEnoughtFuelException() = default;
 
     // Constructor accepting const char*
-    BaseException(const char* message)
+    NotEnoughtFuelException(const char* message)
         : m_message(message)
     {}
 
     // Override what() method, marked
     // noexcept for modern C++
-    const char* what() const noexcept { return m_message.c_str(); }
+    const char* what() const noexcept
+    {
+        return m_message.c_str();
+    }
 
 private:
     std::string m_message;
