@@ -29,6 +29,7 @@ target_include_directories(${TARGET} PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_L
 target_link_libraries(
     ${TARGET}
     PUBLIC
+    pthread
 )
 
 set_target_properties(
