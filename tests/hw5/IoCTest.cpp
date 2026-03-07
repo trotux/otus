@@ -1,62 +1,74 @@
-#include "BaseException.h"
-#include "CommandQueue.h"
-#include "CommandQueueProcessor.h"
-#include "CommandException.h"
-#include "ExceptionDispatcher.h"
-
-#include "LogCommand.h"
+#include "ICommand.h"
+#include "EmptyCommand.h"
+#include "MoveCommand.h"
 #include "LogExceptionHandler.h"
 
-#include "TestLogger.h"
-#include "FailCommand.h"
+#include "IoC.h"
+#include "UObject.h"
+#include "MovableObjectAdapter.h"
+#include "Velocity.h"
 
 #include <gtest/gtest.h>
 
+#include <functional>
 #include <memory>
+#include <print>
 
-namespace otus
+TEST(IOC, Base)
 {
-using FailCommandWithBaseException = otus::FailCommand<otus::BaseException>;
-}
+    std::shared_ptr<otus::UObject> obj = std::make_shared<otus::UObject>();
 
-TEST(CQ, LogCommand)
-{
-    otus::TestLogger logger;
-    std::string testMessage = std::format("test log message");
+    otus::IoC ioc;
 
-    auto logCmd = std::make_shared<otus::LogCommand>(logger, testMessage); 
-    ASSERT_NE(logCmd, nullptr);
+    otus::Binder<int, std::string>().call(
+        [](int a, std::string s)
+        {
+            std::print(stderr, "int: {}\n string: {}\n", a, s);
+            return 0;
+        },
+        {5, std::string("Hello, Delegates!")});
 
-    logCmd->execute();
-
-    auto message = logger.getMessage();
-    EXPECT_FALSE(message.empty());
-    EXPECT_EQ(message, testMessage);
-}
-
-TEST(CQ, LogExceptionHandler)
-{
-    otus::TestLogger logger;
-    otus::CommandQueue queue;
-    otus::ExceptionDispatcher dispatcher;
-    otus::CommandQueueProcessor queueProcessor(queue, dispatcher);
+    //    auto cmd = otus::Builder<otus::EmptyCommand, otus::UObject>{};
     
-    using HandlerType = otus::LogExceptionHandler<otus::FailCommandWithBaseException>;
 
-    dispatcher.addHandler<otus::BaseException, otus::FailCommandWithBaseException, HandlerType>(logger, queue);
-    auto cmd = std::make_shared<otus::FailCommand<otus::BaseException>>();
+    //std::function<std::shared_ptr<otus::ICommand>(std::shared_ptr<otus::UObject> obj)> func = lambda;
 
-    queue.push(cmd);
-    queueProcessor.process();
+    //ioc.Register("move.command", lambda);
 
-    EXPECT_FALSE(queue.empty());
-    auto message = logger.getMessage();
-    EXPECT_TRUE(message.empty());
+    ioc.Resolve<otus::ICommand>(
+        "IOC.Register",
+        "move.command",
+        [](std::shared_ptr<otus::UObject> obj) -> std::shared_ptr<otus::ICommand>
+        {
+            std::print(stderr, ">>>>>> {}\n", __PRETTY_FUNCTION__);
+            std::shared_ptr<otus::MovableObjectAdapter> moveAdapter = std::make_shared<otus::MovableObjectAdapter>(obj);
+            return std::make_unique<otus::MoveCommand>(moveAdapter);
+        }
+    )->execute();
 
-    queueProcessor.process();
+    auto cmd = ioc.Resolve<otus::ICommand>("move.command", obj);
 
-    std::string testMessage{"command \"otus::FailCommand<otus::BaseException>\" throw exception \"otus::BaseException\""};
-    message = logger.getMessage();
-    EXPECT_FALSE(message.empty());
-    EXPECT_EQ(message, testMessage);
+    std::shared_ptr<otus::Velocity> velocity;
+    ioc.Resolve<otus::ICommand>("Spaceship.Operations.IMovable:position.set", obj, velocity)->execute();
+
+#if 0
+    auto builder = std::make_unique<otus::Builder<otus::EmptyCommand>>();
+    std::print(stderr, "type: {}\n", typeid(builder).name());
+
+
+    std::shared_ptr<otus::ICommand> cmd = builder->build<otus::ICommand>();
+
+    std::print(stderr, "type: {}\n", typeid(cmd.get() ).name());
+
+    auto variadic_generic_lambda = [] (auto... param)
+    {
+        return std::make_unique<otus::EmptyCommand>(param...);
+    };
+
+    std::function<std::shared_ptr<otus::ICommand>()> func = variadic_generic_lambda;
+    std::print(stderr, "type: {}\n", typeid(func).name());
+
+    auto cmd2 = func();
+#endif
 }
+

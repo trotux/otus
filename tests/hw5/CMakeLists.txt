@@ -2,6 +2,7 @@ set(test_name "tests_hw5")
 
 add_executable(${test_name}
     ${CMAKE_CURRENT_SOURCE_DIR}/IoCTest.cpp
+    ${CMAKE_CURRENT_SOURCE_DIR}/DelegateTest.cpp
 )
 
 target_link_libraries(${test_name}
