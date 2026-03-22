@@ -6,6 +6,7 @@
 #include <memory>
 #include <typeindex>
 #include <unordered_map>
+#include <mutex>
 
 namespace otus
 {
