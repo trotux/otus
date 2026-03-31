@@ -10,9 +10,11 @@
 namespace otus::ioc
 {
 
+
+template<typename T>
 struct RegisterCommand : public ICommand
 {
-    using Function = std::function<std::shared_ptr<ICommand>(std::vector<std::any>)>;
+    using Function = std::function<std::shared_ptr<T>(std::vector<std::any>)>;
     using FunctionMap = std::unordered_map<std::string, Function>;
 
     RegisterCommand(FunctionMap& map, const std::string& path, Function&& func)

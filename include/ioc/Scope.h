@@ -1,6 +1,6 @@
 #pragma once
 
-#include "EmptyCommand.h"
+#include "ICommand.h"
 #include "ioc/RegisterCommand.h"
 
 #include <any>
@@ -33,11 +33,6 @@ public:
     template<typename... Args>
     std::shared_ptr<T> resolve(const std::string& key, Args&&... args)
     {
-        if (key == "IOC.Register")
-        {
-            return emplace(std::forward<Args>(args)...);
-        }
-
         return get(key, std::forward<Args>(args)...);
     }
 
@@ -50,22 +45,17 @@ public:
             return std::invoke(m_map[key], params);
         }
 
-        return std::make_shared<EmptyCommand>();
+        return nullptr;
     }
 
-    template<typename... Args>
-    std::shared_ptr<T> emplace(Args&&... args)
+    std::shared_ptr<ICommand> emplace(const std::string& key, Function&& func)
     {
-        return std::make_shared<EmptyCommand>();
-    }
-
-    template<typename Path=std::string, typename FunctionType>
-    std::shared_ptr<T> emplace(Path&& path, FunctionType&& func)
-    {
-        return RegisterCommand::make(m_map, path, std::move(func));
+        return RegisterCommand<T>::make(m_map, key, std::move(func));
     }
 
 private:
+
+
     std::string m_name;
     FunctionMap m_map;
 };

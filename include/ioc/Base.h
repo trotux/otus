@@ -1,12 +1,15 @@
+#pragma once
+
 #include "EmptyCommand.h"
+#include "ICommand.h"
 #include "ioc/Scope.h"
 #include "ioc/DefaultCommand.h"
 
-#include <functional>
 #include <memory>
 #include <mutex>
 #include <optional>
 #include <string>
+#include <type_traits>
 
 namespace otus::ioc
 {
@@ -16,25 +19,36 @@ class Base
 public:
     Base() = default;
 
+    struct Action
+    {
+        std::string key;
+        std::string path;
+    };
+    
     template<typename T, typename... Args>
     std::shared_ptr<T> resolve(const std::string& key, Args&&... args)
     {
-        std::shared_ptr<T> cmd = checkForAction<T>(key, std::forward<Args>(args)...);
-        if (cmd != nullptr)
-        {
-            return cmd;
-        }
-
         std::shared_ptr<IScope> scope = g_currentScope ? g_currentScope : m_defaultScope;
         if (scope != nullptr)
         {
             auto impl = std::dynamic_pointer_cast<Scope<T>>(scope);
-            return impl->resolve(key, std::forward<Args>(args)...);
+            auto ret = impl->get(key, std::forward<Args>(args)...);
+
+            if (ret != nullptr)
+            {
+                return ret;
+            }
         }
 
-        return std::make_shared<EmptyCommand>();
+        if constexpr (std::is_same_v<T, ICommand>)
+        {
+            return std::make_shared<EmptyCommand>();
+        }
+
+        return nullptr;
     }
 
+#if 0
     template<typename T>
     std::shared_ptr<T> resolve(const std::string& key)
     {
@@ -42,11 +56,72 @@ public:
         if (scope != nullptr)
         {
             auto impl = std::dynamic_pointer_cast<Scope<T>>(scope);
-            return impl->resolve(key);
+            auto ret = impl->get(key);
+            if (ret != nullptr)
+            {
+                return ret;
+            }
+        }
+
+        if constexpr (std::is_same_v<T, ICommand>)
+        {
+            return std::make_shared<EmptyCommand>();
+        }
+        else
+        {
+            return std::make_shared<T>();
+        }
+    }
+#endif
+    
+    template<typename T>
+    std::shared_ptr<ICommand> resolve(const Action& action)
+    {
+        if (action.key == "Scopes.New")
+        {
+            auto cmd = [&, name = action.path] {
+                addNewScope<T>(name);
+            };
+
+            return std::make_shared<DefaultCommand>(cmd);
+        }
+        else if (action.key == "Scopes.Current")
+        {
+            auto cmd = [&, name = action.path] {
+                setCurrentScope(name);
+            };
+
+            return std::make_shared<DefaultCommand>(cmd);
+        }
+        else if (action.key == "Scopes.Default")
+        {
+            auto cmd = [&, name = action.path] {
+                setDefaultScope(name);
+            };
+
+            return std::make_shared<DefaultCommand>(cmd);
         }
 
         return std::make_shared<EmptyCommand>();
     }
+
+    template<typename T>
+    std::shared_ptr<ICommand> resolve(const Action& action, Scope<T>::Function&& func)
+    {
+        std::shared_ptr<IScope> scope = g_currentScope ? g_currentScope : m_defaultScope;
+        if (scope != nullptr)
+        {
+            if (action.key == "IOC.Register")
+            {
+                auto impl = std::dynamic_pointer_cast<Scope<T>>(scope);
+
+                return impl->emplace(action.path, std::move(func));
+            }
+        }
+
+        return std::make_shared<EmptyCommand>();
+    }
+
 
 private:
     template <typename First, typename... Rest>
@@ -87,10 +162,8 @@ private:
     }
 
     template<typename T, typename... Args>
-    std::shared_ptr<T> checkForAction(const std::string& key, Args&&... args)
+    std::shared_ptr<ICommand> checkForAction(const std::string& key, Args&&... args)
     {
-        std::function<void()> command;
-
         if (key == "Scopes.New")
         {
             auto key2 = getFirstArg(std::forward<Args>(args)...);
