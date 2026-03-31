@@ -13,18 +13,12 @@
 TEST(IOC, BaseTest)
 {
     otus::ioc::Base ioc;
-    
+
     // create scope "test1"
-    ioc.resolve<otus::ICommand>(
-        "Scopes.New",
-        "test1"
-    )->execute();
+    ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.New", "test1"})->execute();
 
     // set scope "test1" as current
-    ioc.resolve<otus::ICommand>(
-        "Scopes.Current",
-        "test1"
-    )->execute();
+    ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.Current", "test1"})->execute();
 
     // try to resolve "test.command" in scope "test1"
     auto cmd = ioc.resolve<otus::ICommand>("test.command");
@@ -36,8 +30,7 @@ TEST(IOC, BaseTest)
 
     // register test.command for Test1Command in scope test1
     ioc.resolve<otus::ICommand>(
-        "IOC.Register",
-        "test.command",
+        otus::ioc::Base::Action{"IOC.Register", "test.command"},
         std::function([](std::vector<std::any> args) -> std::shared_ptr<otus::ICommand>
         {
             return std::make_shared<otus::Test1Command>();
@@ -53,16 +46,10 @@ TEST(IOC, BaseTest)
     EXPECT_EQ(otus::Test2Command::getExecuteCount(), 0);
 
     // create scope "test2"
-    ioc.resolve<otus::ICommand>(
-        "Scopes.New",
-        "test2"
-    )->execute();
+    ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.New", "test2"})->execute();
 
     // set scope "test2" as current
-    ioc.resolve<otus::ICommand>(
-        "Scopes.Current",
-        "test2"
-    )->execute();
+    ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.Current", "test2"})->execute();
 
     // try to resolve "test.command" in scope "test2"
     cmd = ioc.resolve<otus::ICommand>("test.command");
@@ -73,14 +60,11 @@ TEST(IOC, BaseTest)
     EXPECT_EQ(otus::Test2Command::getExecuteCount(), 0);
 
     // register test.command for Test2Command in scope test2
-    ioc.resolve<otus::ICommand>(
-        "IOC.Register",
-        "test.command",
-        std::function([](std::vector<std::any> args) -> std::shared_ptr<otus::ICommand>
-        {
-            return std::make_shared<otus::Test2Command>();
-        })
-    )->execute();
+    ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"IOC.Register", "test.command"},
+                                std::function([](std::vector<std::any> args) -> std::shared_ptr<otus::ICommand> {
+                                    return std::make_shared<otus::Test2Command>();
+                                }))
+        ->execute();
 
     // try to resolve "test.command" in scope "test2"
     cmd = ioc.resolve<otus::ICommand>("test.command");
@@ -91,10 +75,7 @@ TEST(IOC, BaseTest)
     EXPECT_EQ(otus::Test2Command::getExecuteCount(), 1);
 
     // set scope "test1" as current
-    ioc.resolve<otus::ICommand>(
-        "Scopes.Current",
-        "test1"
-    )->execute();
+    ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.Current", "test1"})->execute();
 
     // try to resolve "test.command" in scope "test1"
     cmd = ioc.resolve<otus::ICommand>("test.command");
@@ -114,32 +95,32 @@ TEST(IOC, MultiThreadingTest)
 
     // create scope "test1"
     ioc.resolve<otus::ICommand>(
-        "Scopes.New",
-        "test1"
+        otus::ioc::Base::Action{"Scopes.New",
+        "test1"}
     )->execute();
 
     // create scope "test2"
     ioc.resolve<otus::ICommand>(
-        "Scopes.New",
-        "test2"
+        otus::ioc::Base::Action{"Scopes.New",
+        "test2"}
     )->execute();
 
     // create scope "test3"
     ioc.resolve<otus::ICommand>(
-        "Scopes.New",
-        "test3"
+        otus::ioc::Base::Action{"Scopes.New",
+        "test3"}
     )->execute();
 
     // set scope "test1" as current
     ioc.resolve<otus::ICommand>(
-        "Scopes.Current",
-        "test1"
+        otus::ioc::Base::Action{"Scopes.Current",
+        "test1"}
     )->execute();
 
     // register test.command for Test1Command in scope test1
     ioc.resolve<otus::ICommand>(
-        "IOC.Register",
-        "test.command",
+        otus::ioc::Base::Action{"IOC.Register",
+        "test.command"},
         std::function([](std::vector<std::any> args) -> std::shared_ptr<otus::ICommand>
         {
             return std::make_shared<otus::Test1Command>();
@@ -148,14 +129,14 @@ TEST(IOC, MultiThreadingTest)
 
     // set scope "test2" as current
     ioc.resolve<otus::ICommand>(
-        "Scopes.Current",
-        "test2"
+        otus::ioc::Base::Action{"Scopes.Current",
+        "test2"}
     )->execute();
 
     // register test.command for Test1Command in scope test1
     ioc.resolve<otus::ICommand>(
-        "IOC.Register",
-        "test.command",
+        otus::ioc::Base::Action{"IOC.Register",
+        "test.command"},
         std::function([](std::vector<std::any> args) -> std::shared_ptr<otus::ICommand>
         {
             return std::make_shared<otus::Test2Command>();
@@ -164,8 +145,8 @@ TEST(IOC, MultiThreadingTest)
 
     // set scope "test1" as current
     ioc.resolve<otus::ICommand>(
-        "Scopes.Current",
-        "test3"
+        otus::ioc::Base::Action{"Scopes.Current",
+        "test3"}
     )->execute();
 
     ioc.resolve<otus::ICommand>("test.command")->execute();
@@ -176,7 +157,7 @@ TEST(IOC, MultiThreadingTest)
         for (unsigned i = 0; i < 10; i++)
         {
             // set scope "test2" as current
-            ioc.resolve<otus::ICommand>("Scopes.Current", "test1")->execute();
+            ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.Current", "test1"})->execute();
 
             // try to resolve "test.command" in scope "test1"
             ioc.resolve<otus::ICommand>("test.command")->execute();
@@ -187,7 +168,7 @@ TEST(IOC, MultiThreadingTest)
         for (unsigned i = 0; i < 20; i++)
         {
             // set scope "test2" as current
-            ioc.resolve<otus::ICommand>("Scopes.Current", "test2")->execute();
+            ioc.resolve<otus::ICommand>(otus::ioc::Base::Action{"Scopes.Current", "test2"})->execute();
 
             // try to resolve "test.command" in scope "test1"
             ioc.resolve<otus::ICommand>("test.command")->execute();
